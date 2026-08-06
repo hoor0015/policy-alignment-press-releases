@@ -14,6 +14,7 @@ All tables are written to output/ as CSV; Figure 5 is written to figures/ at 300
 
 Usage: python code/05_similarity_regressions.py   (run from the repository root)
 """
+import textwrap
 from pathlib import Path
 
 import numpy as np
@@ -200,7 +201,17 @@ plt.figure(figsize=(10, 6))
 sns.barplot(x="ministry", y="avg_similarity", hue="type", data=d,
             order=ministry_display_order, hue_order=type_order,
             palette=palette, seed=42)
-plt.title("Mean of Cosine Similarity by Ministry and Type")
+plt.tight_layout()
+fig = plt.gcf()
+fig.text(0.0, 1.02, textwrap.fill(
+    "Figure 5. Cosine Similarity between Government Policy Commitment and "
+    "Press Release Documents for Ministers and Vice Ministers, across "
+    "Ministries", 100), ha="left", va="bottom", fontsize=12, fontweight="bold")
+fig.text(0.0, -0.03, textwrap.fill(
+    "Notes: Estimation is based on the coefficients in Table 6. AFF = "
+    "agriculture, forestry, and food, DEF = Defense, EDU = education, GEF = "
+    "gender equality and family, HSW = health and social welfare, and MEF = "
+    "economy and finance.", 140), ha="left", va="top", fontsize=9)
 plt.savefig(FIG / "Figure5_cosine_similarity_by_ministry.png", dpi=300, bbox_inches="tight")
 plt.close()
 print(f"\nSaved {FIG / 'Figure5_cosine_similarity_by_ministry.png'}")

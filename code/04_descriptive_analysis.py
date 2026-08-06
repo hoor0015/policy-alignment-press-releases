@@ -17,6 +17,7 @@ fixed here in TRANSLATION, matching the labels in the published figures.
 
 Usage: python code/04_descriptive_analysis.py   (run from the repository root)
 """
+import textwrap
 from collections import Counter
 from pathlib import Path
 
@@ -27,6 +28,15 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
+
+
+def embed_caption(fig, title, note=None, wrap=100, note_wrap=140):
+    """Embed the manuscript caption as the figure title and note in the image."""
+    fig.text(0.0, 1.02, textwrap.fill(title, wrap), ha="left", va="bottom",
+             fontsize=12, fontweight="bold")
+    if note:
+        fig.text(0.0, -0.03, textwrap.fill(note, note_wrap), ha="left", va="top",
+                 fontsize=9)
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "data" / "analysis"
@@ -102,10 +112,12 @@ sns.histplot(data=df, x="Word Frequency", hue="Type", element="step", fill=True,
              common_norm=False, stat="density", palette=["#2ca02c", "#ff7f0e"],
              hue_order=["Vice Minister", "Minister"])
 plt.legend(title="Type", labels=legend_stats["label"])
-plt.title("Histogram of Word Frequencies Per Document by Type")
 plt.xlabel("Word Frequency per Document")
 plt.ylabel("Density")
 plt.xlim(0, 500)
+plt.tight_layout()
+embed_caption(plt.gcf(),
+              "Figure 2. Word Frequency Per Document for Ministers and Vice Ministers")
 plt.savefig(FIG / "Figure2_word_frequency_histogram.png", dpi=300, bbox_inches="tight")
 plt.close()
 
@@ -142,9 +154,11 @@ sns.barplot(x="Word", y="Percentage", hue="Category", data=df_words,
 plt.xticks(rotation=45)
 plt.xlabel("Words")
 plt.ylabel("Percentage")
-plt.title("Probability of Word Occurrence (%)")
 plt.legend(title="Category")
 plt.tight_layout()
+embed_caption(plt.gcf(),
+              "Figure 3. Probability of Word Occurrence in Minister and "
+              "Vice-Minister Documents")
 plt.savefig(FIG / "Figure3_word_occurrence_probability.png", dpi=300, bbox_inches="tight")
 plt.close()
 
@@ -193,6 +207,9 @@ for i, category in enumerate(["minister", "vice minister"]):
         axes[i][j].set_xlabel("Words")
         axes[i][j].set_ylabel(ylabel)
 plt.tight_layout()
+embed_caption(fig,
+              "Figure 4. Top 20 Keywords in Minister and Vice-Minister Documents: "
+              "Frequency and TF-IDF", wrap=190)
 plt.savefig(FIG / "Figure4_top_keywords_frequency_tfidf.png", dpi=300, bbox_inches="tight")
 plt.close()
 
