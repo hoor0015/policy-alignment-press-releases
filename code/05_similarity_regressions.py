@@ -206,12 +206,19 @@ fig = plt.gcf()
 fig.text(0.0, 1.02, textwrap.fill(
     "Figure 5. Cosine Similarity between Government Policy Commitment and "
     "Press Release Documents for Ministers and Vice Ministers, across "
-    "Ministries", 100), ha="left", va="bottom", fontsize=12, fontweight="bold")
-fig.text(0.0, -0.03, textwrap.fill(
-    "Notes: Estimation is based on the coefficients in Table 6. AFF = "
-    "agriculture, forestry, and food, DEF = Defense, EDU = education, GEF = "
-    "gender equality and family, HSW = health and social welfare, and MEF = "
-    "economy and finance.", 140), ha="left", va="top", fontsize=9)
+    "Ministries", 100), ha="left", va="bottom", fontsize=12, fontweight="bold",
+    family="Times New Roman")
+note_label = fig.text(0.0, -0.03, "Notes:", ha="left", va="top", fontsize=10,
+                      style="italic", family="Times New Roman")
+fig.canvas.draw()
+x_after = fig.transFigure.inverted().transform(
+    (note_label.get_window_extent().x1, 0))[0] + 0.004
+fig.text(x_after, -0.03, textwrap.fill(
+    "Estimation is based on the coefficients in Table 6. AFF = agriculture, "
+    "forestry, and food, DEF = Defense, EDU = education, GEF = gender "
+    "equality and family, HSW = health and social welfare, and MEF = economy "
+    "and finance.", 130), ha="left", va="top", fontsize=10,
+    family="Times New Roman")
 plt.savefig(FIG / "Figure5_cosine_similarity_by_ministry.png", dpi=300, bbox_inches="tight")
 plt.close()
 print(f"\nSaved {FIG / 'Figure5_cosine_similarity_by_ministry.png'}")

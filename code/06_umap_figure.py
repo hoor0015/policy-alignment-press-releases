@@ -89,12 +89,19 @@ g.add_legend(title="Type", legend_data=legend_data)
 
 g.figure.text(0.0, 1.01, textwrap.fill(
     "Figure 6. Policy Commitments and Press Release Documents in UMAP Space",
-    95), ha="left", va="bottom", fontsize=12, fontweight="bold")
-g.figure.text(0.0, -0.01, textwrap.fill(
-    "Note: AFF = agriculture, forestry, and food, DEF = Defense, EDU = "
-    "education, GEF = gender equality and family, HSW = health and social "
-    "welfare, and MEF = economy and finance.", 130), ha="left", va="top",
-    fontsize=9)
+    95), ha="left", va="bottom", fontsize=12, fontweight="bold",
+    family="Times New Roman")
+note_label = g.figure.text(0.0, -0.01, "Note:", ha="left", va="top",
+                           fontsize=10, style="italic",
+                           family="Times New Roman")
+g.figure.canvas.draw()
+x_after = g.figure.transFigure.inverted().transform(
+    (note_label.get_window_extent().x1, 0))[0] + 0.004
+g.figure.text(x_after, -0.01, textwrap.fill(
+    "AFF = agriculture, forestry, and food, DEF = Defense, EDU = education, "
+    "GEF = gender equality and family, HSW = health and social welfare, and "
+    "MEF = economy and finance.", 125), ha="left", va="top", fontsize=10,
+    family="Times New Roman")
 g.savefig(FIG / "Figure6_umap_space.png", dpi=300, bbox_inches="tight")
 plt.close("all")
 print("Saved", FIG / "Figure6_umap_space.png")

@@ -30,13 +30,23 @@ import seaborn as sns
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 
 
-def embed_caption(fig, title, note=None, wrap=100, note_wrap=140):
-    """Embed the manuscript caption as the figure title and note in the image."""
+def embed_caption(fig, title, note=None, wrap=100, note_wrap=130):
+    """Embed the manuscript caption as the figure title and note in the image.
+
+    Manuscript formatting: title in Times New Roman 12 pt bold; the note label
+    ("Note:"/"Notes:") in italic with the note text in Times New Roman 10 pt.
+    """
     fig.text(0.0, 1.02, textwrap.fill(title, wrap), ha="left", va="bottom",
-             fontsize=12, fontweight="bold")
+             fontsize=12, fontweight="bold", family="Times New Roman")
     if note:
-        fig.text(0.0, -0.03, textwrap.fill(note, note_wrap), ha="left", va="top",
-                 fontsize=9)
+        label, _, body = note.partition(":")
+        t1 = fig.text(0.0, -0.03, label + ":", ha="left", va="top",
+                      fontsize=10, style="italic", family="Times New Roman")
+        fig.canvas.draw()
+        x_after = fig.transFigure.inverted().transform(
+            (t1.get_window_extent().x1, 0))[0] + 0.004
+        fig.text(x_after, -0.03, textwrap.fill(body.strip(), note_wrap),
+                 ha="left", va="top", fontsize=10, family="Times New Roman")
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "data" / "analysis"
