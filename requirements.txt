@@ -1,0 +1,15 @@
+# Versions used for verification (Python 3.12)
+pandas==3.0.2
+numpy==2.4.4
+pyarrow==23.0.1
+openpyxl==3.1.5
+scikit-learn==1.8.0
+statsmodels==0.14.6
+scipy==1.17.1
+seaborn==0.13.2
+matplotlib==3.10.8
+umap-learn==0.5.12
+gensim==4.4.0
+
+# Required only for the upstream pipeline scripts (01-03, 07)
+# konlpy  (+ Mecab-ko; see https://github.com/SOMJANG/Mecab-ko-for-Google-Colab)
