@@ -203,22 +203,43 @@ sns.barplot(x="ministry", y="avg_similarity", hue="type", data=d,
             palette=palette, seed=42)
 plt.tight_layout()
 fig = plt.gcf()
-fig.text(0.0, 1.02, textwrap.fill(
+fig.canvas.draw()
+renderer = fig.canvas.get_renderer()
+tight = fig.axes[0].get_tightbbox(renderer)
+inv = fig.transFigure.inverted()
+x0 = inv.transform((tight.x0, 0))[0]
+
+
+def fit_wrap(text, avail_px, **kw):
+    """Wrap text at the largest line length that still fits within avail_px."""
+    wrapped = text
+    for wrap in range(240, 19, -2):
+        wrapped = textwrap.fill(text, wrap)
+        probe = fig.text(0, 0, wrapped, **kw)
+        w = probe.get_window_extent(renderer).width
+        probe.remove()
+        if w <= avail_px:
+            break
+    return wrapped
+
+
+title_kw = dict(fontsize=12, fontweight="bold", family="Times New Roman")
+fig.text(x0, 1.02, fit_wrap(
     "Figure 5. Cosine Similarity between Government Policy Commitment and "
     "Press Release Documents for Ministers and Vice Ministers, across "
-    "Ministries", 100), ha="left", va="bottom", fontsize=12, fontweight="bold",
-    family="Times New Roman")
-note_label = fig.text(0.0, -0.03, "Notes:", ha="left", va="top", fontsize=10,
-                      style="italic", family="Times New Roman")
-fig.canvas.draw()
-x_after = fig.transFigure.inverted().transform(
-    (note_label.get_window_extent().x1, 0))[0] + 0.004
-fig.text(x_after, -0.03, textwrap.fill(
+    "Ministries", tight.width, **title_kw), ha="left", va="bottom", **title_kw)
+
+label_kw = dict(fontsize=10, style="italic", family="Times New Roman")
+note_label = fig.text(x0, -0.03, "Notes:", ha="left", va="top", **label_kw)
+label_w = note_label.get_window_extent(renderer).width + 8
+x_after = inv.transform((tight.x0 + label_w, 0))[0]
+note_kw = dict(fontsize=10, family="Times New Roman")
+fig.text(x_after, -0.03, fit_wrap(
     "Estimation is based on the coefficients in Table 6. AFF = agriculture, "
     "forestry, and food, DEF = Defense, EDU = education, GEF = gender "
     "equality and family, HSW = health and social welfare, and MEF = economy "
-    "and finance.", 130), ha="left", va="top", fontsize=10,
-    family="Times New Roman")
+    "and finance.", tight.width - label_w, **note_kw),
+    ha="left", va="top", **note_kw)
 plt.savefig(FIG / "Figure5_cosine_similarity_by_ministry.png", dpi=300, bbox_inches="tight")
 plt.close()
 print(f"\nSaved {FIG / 'Figure5_cosine_similarity_by_ministry.png'}")

@@ -24,6 +24,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 import umap.umap_ as umap
+from matplotlib.transforms import Bbox
 from sklearn.preprocessing import StandardScaler
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -86,22 +87,46 @@ g.set_axis_labels("UMAP Dimension 1", "UMAP Dimension 2")
 legend_data = {k: v for k, v in g._legend_data.items()
                if k in ("policy commitment", "minister", "vice minister")}
 g.add_legend(title="Type", legend_data=legend_data)
+sns.move_legend(g, "upper center", bbox_to_anchor=(0.5, -0.005), ncol=3,
+                title="Type", frameon=False)
 
-g.figure.text(0.0, 1.01, textwrap.fill(
+fig = g.figure
+fig.canvas.draw()
+renderer = fig.canvas.get_renderer()
+tight = Bbox.union([ax.get_tightbbox(renderer) for ax in fig.axes])
+inv = fig.transFigure.inverted()
+x0 = inv.transform((tight.x0, 0))[0]
+
+
+def fit_wrap(text, avail_px, **kw):
+    """Wrap text at the largest line length that still fits within avail_px."""
+    wrapped = text
+    for wrap in range(240, 19, -2):
+        wrapped = textwrap.fill(text, wrap)
+        probe = fig.text(0, 0, wrapped, **kw)
+        w = probe.get_window_extent(renderer).width
+        probe.remove()
+        if w <= avail_px:
+            break
+    return wrapped
+
+
+title_kw = dict(fontsize=12, fontweight="bold", family="Times New Roman")
+fig.text(x0, 1.01, fit_wrap(
     "Figure 6. Policy Commitments and Press Release Documents in UMAP Space",
-    95), ha="left", va="bottom", fontsize=12, fontweight="bold",
-    family="Times New Roman")
-note_label = g.figure.text(0.0, -0.01, "Note:", ha="left", va="top",
-                           fontsize=10, style="italic",
-                           family="Times New Roman")
-g.figure.canvas.draw()
-x_after = g.figure.transFigure.inverted().transform(
-    (note_label.get_window_extent().x1, 0))[0] + 0.004
-g.figure.text(x_after, -0.01, textwrap.fill(
+    tight.width, **title_kw), ha="left", va="bottom", **title_kw)
+
+y_note = inv.transform((0, g.legend.get_window_extent(renderer).y0))[1] - 0.012
+label_kw = dict(fontsize=10, style="italic", family="Times New Roman")
+note_label = fig.text(x0, y_note, "Note:", ha="left", va="top", **label_kw)
+label_w = note_label.get_window_extent(renderer).width + 8
+x_after = inv.transform((tight.x0 + label_w, 0))[0]
+note_kw = dict(fontsize=10, family="Times New Roman")
+fig.text(x_after, y_note, fit_wrap(
     "AFF = agriculture, forestry, and food, DEF = Defense, EDU = education, "
     "GEF = gender equality and family, HSW = health and social welfare, and "
-    "MEF = economy and finance.", 125), ha="left", va="top", fontsize=10,
-    family="Times New Roman")
+    "MEF = economy and finance.", tight.width - label_w, **note_kw),
+    ha="left", va="top", **note_kw)
 g.savefig(FIG / "Figure6_umap_space.png", dpi=300, bbox_inches="tight")
 plt.close("all")
 print("Saved", FIG / "Figure6_umap_space.png")
